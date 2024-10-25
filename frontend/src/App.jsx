@@ -32,6 +32,8 @@ import InfoTablet from './pages/InfoTablet.jsx'
 import EcommerceStore from './store/EcommerceStore.jsx'
 import Consultancy from './pages/Consultancy.jsx'
 import JitsiMeet from './pages/JitsiMeet.jsx'
+import AllIsolationRequest from './pages/AllIsolationRequest.jsx'
+import Form from './pages/Form.jsx'
 
 
 
@@ -76,6 +78,8 @@ const App = () => {
       <Route path='/ecommerce-store' element={<EcommerceStore/>}/>
       <Route path='/consultancy' element={<Consultancy/>}/>
       <Route path='/jitsimeet/:videolink' element={<JitsiMeet/>}/>
+      <Route path='/isolation' element={<AllIsolationRequest/>}/>
+      <Route path='/form' element={<Form/>}/>
 
 
     </Routes>

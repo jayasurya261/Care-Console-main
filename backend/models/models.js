@@ -54,13 +54,10 @@ const appointmentsSchema = mongoose.Schema(
             type:String,
             required:true
         },
-        date:{
+        slot:{
             type:String,
-            required:true
-        },
-        time:{
-            type:String,
-            required:true
+            required:true,
+            unique : true
         },
         description:{
             type:String,

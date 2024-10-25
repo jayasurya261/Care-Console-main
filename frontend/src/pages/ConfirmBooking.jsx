@@ -7,8 +7,10 @@ import { useNavigate } from 'react-router-dom';
 const ConfirmBooking = () => {
   const [email, setEmail] = useState('');
 
-  const { date, time, description } = useParams(); // Pull date, time, description from URL parameters
-  console.log(`${date} ${time} ${description}`);
+  // Pull date, time, and description from URL parameters
+  const { date, time, description } = useParams(); 
+  const slot = `${date} ${time}`; // Combine date and time into a slot variable
+  console.log(`Slot: ${slot}, Description: ${description}`);
 
   const navigate = useNavigate();
 
@@ -22,18 +24,17 @@ const ConfirmBooking = () => {
         setEmail(fetchedEmail); // Update the email state
 
         // Create the info object, including the `prescription` and `fees` fields
-        const prescription = "No prescription added"
+        const prescription = "No prescription added";
         const info = {
           email: fetchedEmail,
-          date,
-          time,
+          slot, // Use the combined slot variable here
           description,
           prescription: 'No prescription added', // Example prescription
-          fees: 'Fees will be show after the doctor consulting', // Fixed fees for now, replace if dynamic
+          fees: 'Fees will be shown after the doctor consultation', // Fixed fees for now, replace if dynamic
         };
 
         // Post the appointment data
-        return axios.post('http://localhost:3000/appointments/add-appointments', info);
+        return axios.post('http://localhost:3001/appointments/add-appointments', info);
       })
       .then((response) => {
         console.log('Appointment booked successfully', response);
@@ -45,7 +46,7 @@ const ConfirmBooking = () => {
   }
 
   return (
-    <div className="flex pb-32 ">
+    <div className="flex pb-32">
       <div>
         <img className="w-96 ml-40 rounded-[20px]" src={images.doctor} alt="Doctor" />
       </div>
@@ -61,8 +62,15 @@ const ConfirmBooking = () => {
           <p>TIME: </p>
           <p>{time}</p>
         </div>
+        <div className="flex font-medium mb-5">
+          <p>SLOT: </p>
+          <p>{slot}</p>
+        </div>
         <div className="mt-10">
-          <button onClick={confirm} className="bg-blue-500 text-white rounded-md p-2 bg-blue-600 rounded-[10px]">
+          <button 
+            onClick={confirm} 
+            className="bg-blue-500 text-white rounded-md p-2 bg-blue-600 rounded-[10px]"
+          >
             CONFIRM
           </button>
         </div>

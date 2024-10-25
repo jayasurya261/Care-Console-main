@@ -136,8 +136,7 @@ router.post('/add-appointments',async(request,response)=>{
     try{
         if(
             !request.body.email ||
-            !request.body.date ||
-            !request.body.time ||
+            !request.body.slot ||
             !request.body.description ||
             !request.body.fees ||
             !request.body.prescription
@@ -148,8 +147,8 @@ router.post('/add-appointments',async(request,response)=>{
         }
         const appointmentDetails = {
             email : request.body.email,
-            date : request.body.date,
-            time : request.body.time,
+            slot : request.body.slot,
+           
             description : request.body.description,
             prescription : request.body.fees,
             fees : request.body.prescription,

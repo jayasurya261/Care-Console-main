@@ -2,17 +2,41 @@ import React, { useState } from 'react';
 import { images } from '../assets/images';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import TimePicker from 'react-time-picker';
-import 'react-time-picker/dist/TimePicker.css';
 import { useNavigate } from 'react-router-dom';
 import '../style/CalendarCustom.css';
+
+// Mock function for checking if a slot is already booked
+const isSlotAvailable = (date, time) => {
+  // Example of booked slots (you will fetch this from your backend in a real app)
+  const bookedSlots = [
+    { date: '2024-10-24', time: '10:00' },
+    { date: '2024-10-24', time: '11:00' }
+  ];
+
+  const selectedDate = date.toISOString().split('T')[0];
+  return !bookedSlots.some(slot => slot.date === selectedDate && slot.time === time);
+};
+
+// Generate time slots every 15 minutes (08:00 to 18:00 as an example)
+const generateTimeSlots = () => {
+  const slots = [];
+  const startTime = 8 * 60; // 8:00 in minutes
+  const endTime = 18 * 60; // 18:00 in minutes
+  for (let minutes = startTime; minutes <= endTime; minutes += 15) {
+    const hour = Math.floor(minutes / 60).toString().padStart(2, '0');
+    const minute = (minutes % 60).toString().padStart(2, '0');
+    slots.push(`${hour}:${minute}`);
+  }
+  return slots;
+};
 
 const BookAppointment = () => {
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState('10:00');
   const [description, setDescription] = useState('');
-  const [showAlert, setShowAlert] = useState(false); 
-  const [alertType, setAlertType] = useState('success'); // Success or error
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertType, setAlertType] = useState('success');
+  const [alertMessage, setAlertMessage] = useState('');
   const navigate = useNavigate();
 
   const handleDescription = (event) => {
@@ -23,24 +47,32 @@ const BookAppointment = () => {
     setDate(newDate);
   };
 
-  const handleTimeChange = (newTime) => {
-    setTime(newTime);
+  const handleTimeChange = (event) => {
+    setTime(event.target.value); // Use the value selected from dropdown
   };
 
-  const triggerAlert = (type) => {
+  const triggerAlert = (type, message) => {
     setAlertType(type);
-    setShowAlert(true); // Show alert
+    setAlertMessage(message);
+    setShowAlert(true);
     setTimeout(() => {
-      setShowAlert(false); // Hide alert after 2 seconds
+      setShowAlert(false);
     }, 2000);
   };
 
   const handleSubmit = () => {
     if (date && time && description) {
-      triggerAlert('success'); // Trigger the success alert
-      navigate(`/confirm/${date}/${time}/${description}`);
+      if (isSlotAvailable(date, time)) {
+        triggerAlert('success', 'Your appointment has been booked successfully!');
+
+        // Construct the confirmation URL with the selected date and time
+        const formattedDate = date.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+        navigate(`/confirm/${formattedDate}/${time}/${description}`); // Send only selected date and time
+      } else {
+        triggerAlert('error', 'The selected time slot is unavailable. Please choose another slot.');
+      }
     } else {
-      triggerAlert('error'); // Trigger the error alert
+      triggerAlert('error', 'Please provide date, time, and description!');
     }
   };
 
@@ -48,7 +80,6 @@ const BookAppointment = () => {
     <div className='flex justify-center '>
       {/* Doctor Card */}
       <div className='md:w-1/3 flex flex-col items-center relative mb-2'>
-        {/* Image Container */}
         <div className='absolute inset-0'>
           <img 
             src={images.doctor} 
@@ -73,11 +104,11 @@ const BookAppointment = () => {
           />
         </div>
         <div className="time-picker-container">
-          <TimePicker 
-            onChange={handleTimeChange} 
-            value={time} 
-            className="time-picker"
-          />
+          <select onChange={handleTimeChange} value={time} className="time-picker">
+            {generateTimeSlots().map((slot, index) => (
+              <option key={index} value={slot}>{slot}</option>
+            ))}
+          </select>
         </div>
         <div>
           <textarea 
@@ -117,7 +148,7 @@ const BookAppointment = () => {
                     d="M13.875 18.825A9 9 0 105.175 10.125a9 9 0 008.7 8.7zm0 0l5.25 5.25" 
                   />
                 </svg>
-                <span>Your appointment has been booked successfully!</span>
+                <span>{alertMessage}</span>
               </>
             ) : (
               <>
@@ -135,7 +166,7 @@ const BookAppointment = () => {
                     d="M12 9v3.75m0 3.75h.008v-.008H12v.008zm9-7.5A9 9 0 1112 3a9 9 0 019 9z" 
                   />
                 </svg>
-                <span>Please provide date, time, and description!</span>
+                <span>{alertMessage}</span>
               </>
             )}
           </div>
