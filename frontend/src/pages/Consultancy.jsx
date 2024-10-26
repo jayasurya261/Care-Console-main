@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 
 const Consultancy = () => {
   const [appointments, setAppointments] = useState([]);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     // Fetch all appointments from the backend
@@ -19,9 +20,26 @@ const Consultancy = () => {
     fetchAppointments();
   }, []);
 
+  // Filter appointments based on search input
+  const filteredAppointments = appointments.filter((appointment) => {
+    const doctorName = appointment.doctorId === 'doctor1' ? 'Dr.Hermoine' : 'Dr.John Snow';
+    return (
+      doctorName.toLowerCase().includes(search.toLowerCase()) ||
+      appointment.email.toLowerCase().includes(search.toLowerCase()) ||
+      new Date(appointment.date).toLocaleDateString().includes(search)
+    );
+  });
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Video Consultations</h1>
+      <input
+        type="text"
+        placeholder="Search by Doctor, Date, or Email"
+        className="mb-4 p-2 border border-gray-300 rounded w-full"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-300">
           <thead className="bg-gray-100">
@@ -35,9 +53,11 @@ const Consultancy = () => {
             </tr>
           </thead>
           <tbody>
-            {appointments.map((appointment) => (
+            {filteredAppointments.map((appointment) => (
               <tr key={appointment._id} className="hover:bg-gray-100">
-                <td className="py-2 px-6 border-b">{appointment.doctorId == 'doctor1'?<p>Dr.Hermoine</p>:<p>Dr.John Snow</p>}</td>
+                <td className="py-2 px-6 border-b">
+                  {appointment.doctorId === 'doctor1' ? <p>Dr.Hermoine</p> : <p>Dr.John Snow</p>}
+                </td>
                 <td className="py-2 px-6 border-b">
                   {new Date(appointment.date).toLocaleString()}
                 </td>
@@ -46,9 +66,9 @@ const Consultancy = () => {
                 <td className="py-2 px-6 border-b">{appointment.description || 'N/A'}</td>
                 <td className="py-2 px-6 border-b text-center">
                   {appointment.videolink ? (
-                   <Link to={`/jitsimeet/${appointment.videolink}`}>
-                   <p className='text-blue-700 underline'>Join</p>
-                   </Link>
+                    <Link to={`/jitsimeet/${appointment.videolink}`}>
+                      <p className="text-blue-700 underline">Join</p>
+                    </Link>
                   ) : (
                     'N/A'
                   )}
@@ -57,6 +77,7 @@ const Consultancy = () => {
             ))}
           </tbody>
         </table>
+        {filteredAppointments.length === 0 && <p className="text-center mt-4">No results found.</p>}
       </div>
     </div>
   );
